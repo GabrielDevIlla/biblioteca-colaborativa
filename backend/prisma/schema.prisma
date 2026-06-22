@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum StatusAluguel {
+  DISPONIVEL
+  ALUGADO
+}
+
+model Livro {
+  id                Int           @id @default(autoincrement())
+  titulo            String        @db.VarChar(255)
+  autor             String        @db.VarChar(255)
+  dataLancamento    DateTime      @db.Date
+  editora           String        @db.VarChar(255)
+  statusAluguel     StatusAluguel @default(DISPONIVEL)
+  quantidadeAlugada Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  birthday  DateTime @db.Date
+  role      Role     @default(USER)
+  phone     String?  @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
