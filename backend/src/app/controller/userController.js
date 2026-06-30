@@ -1,4 +1,5 @@
 import userRepository from "../repository/userRepository.js";
+import bcrypt from "bcrypt"
 
 const {createUser, showAllUsers, updateUser, deleteUser, findByEmail} = new userRepository();
 
@@ -7,15 +8,18 @@ class userController{
     async loginController(req, res) {
         try {
             const { email, password } = req.body;
-
             if (!email || !password) {
                 return res.status(400).json({ message: 'Email e senha são obrigatórios!' });
             }
 
-            const user = await findByEmail(email);
+            const user = await findByEmail(email)
+            if (!user) {
+                return res.status(401).json({ message: 'Usuário inválido!' });
+            }
 
-            if (!user || user.password !== password) {
-                return res.status(401).json({ message: 'Email ou senha inválidos!' });
+            const passwordMatch = await bcrypt.compare(password, user.password);
+            if (!passwordMatch) {
+                return res.status(401).json({ message: 'Senha incorreta!' })
             }
 
             const { password: _, ...userData } = user;

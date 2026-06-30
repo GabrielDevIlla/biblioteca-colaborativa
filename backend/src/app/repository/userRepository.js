@@ -1,4 +1,5 @@
 import instanciaPrisma from "../../connection/instance.js";
+import bcrypt from "bcrypt";
 
 const prisma = instanciaPrisma.getConnection();
 
@@ -17,11 +18,12 @@ class userRepository{
             const userExists = await prisma.user.findUnique({where: {email: data.email}}); //procura o usuário pra ver se ja existe
             if (!userExists) {
                 const {username, password, email, birthday, phone} = data;
+                const hashedPassword = await bcrypt.hash(data.password, 10);
 
                 const create = prisma.user.create({
                     data: {
                         username,
-                        password,
+                        password: hashedPassword,
                         email,
                         birthday: new Date(birthday),
                         phone
@@ -59,8 +61,11 @@ class userRepository{
                 Object.entries(data).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
             );
 
-            const updateUser = prisma.user.update(
-                {
+            if (cleanData.password) {
+                const hashedPassword = await bcrypt.hash(cleanData.password, 10);
+            }
+
+            const updateUser = prisma.user.update({
                     where:{ id },
                     data: cleanData
                 });
